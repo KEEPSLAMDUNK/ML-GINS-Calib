@@ -1,2 +1,2 @@
-# ML-GINS-Calib: Versatile Targetless Extrinsic Joint Calibration for Multiple LiDARs and GNSS-Aided INS in Autonomous Driving
-The arXiv paper and source code will be available soon!
+# ML-GINS-Calib: Joint Optimization-based Targetless Extrinsic Calibration for Multiple LiDARs and GNSS-Aided INS of Autonomous Vehicles
+The source code and dataset will be released after the paper is accepted!
