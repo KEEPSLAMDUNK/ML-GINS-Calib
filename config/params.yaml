@@ -4,6 +4,60 @@ data_mask_path: data_mask.txt
 
 gins_installation_height: 0.0
 
+# Algorithm parameter configuration
+optimization_params:
+  # Number of threads for optimizer
+  num_threads: 4
+  
+  # First stage optimization (LiDAR-GNSS/INS)
+  lidar_gins_optimization:
+    max_iterations: 20
+    max_correspondence_distance: 0.5
+  
+  # Second stage optimization (Multi-LiDAR)
+  multi_lidar_optimization:
+    max_iterations: 30
+    max_correspondence_distance: 0.5
+  
+  # Keyframe selection parameters
+  keyframe_selection:
+    # Rotation threshold (radians)
+    rotation_threshold: 0.6
+    # Translation threshold (meters)
+    translation_threshold: 5.0
+  
+  # Output format parameters
+  output:
+    # Time display precision (decimal places)
+    time_precision: 3
+    # Millisecond to second conversion factor
+    time_scale_factor: 1000.0
+    # Output file path for extrinsic parameters
+    extrinsic_output_file: "output/extrinsic_parameters.txt"
+  
+  # Point cloud processing parameters
+  point_cloud:
+    # Voxel grid size for downsampling
+    voxel_size: 0.2
+    # Downsampling leaf size
+    downsample_leaf_size: 0.1
+    # Ground segmentation distance threshold
+    ground_distance_threshold: 0.1
+    
+  # Correspondence parameters
+  correspondence:
+    # Distance threshold for correspondences
+    distance_threshold: 1.0
+    
+  # Noise model parameters
+  noise_model:
+    # Huber robust estimator parameter
+    huber_parameter: 0.1
+    # Rotation standard deviation
+    rotation_std: 0.01
+    # Translation standard deviation  
+    translation_std: 0.01
+
 lidar_list:
   - livox
   - middle
@@ -34,10 +88,6 @@ init_ext:
      y: 0
      z: 0
    orientation:
-#     w: 0.0232133
-#     x: -0.70255
-#     y: -0.037592
-#     z: -0.710261
      w: 0.653126
      x: -0.0287627
      y: 0.75669

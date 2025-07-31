@@ -19,7 +19,8 @@
 #include "ml_gins_calib/optimization/extrinsic_calibrator.h"
 
 std::vector<bool> selectKeyframes(const std::vector<Eigen::Isometry3d> &poses,
-                                  double translation_threshold);
+                                  double translation_threshold,
+                                  double rotation_threshold);
 std::vector<std::string> filterPathsBySelection(const std::vector<std::string> &paths,
                                                const std::vector<bool> &selection);
 std::vector<Eigen::Isometry3d>
@@ -37,11 +38,11 @@ buildPointCloudMap(const std::vector<std::string> &cloud_paths,
 double analyzeTerrainRoughness(const CloudPtr &cloud,
                               const std::vector<Eigen::Isometry3d> &poses);
 
-int main(int argc, char **argv) {
+int main() {
   using namespace calib;
   namespace fs = std::filesystem;
 
-  std::string config_path = "./config/init_ext.yaml";
+  std::string config_path = "./config/params.yaml";
 
   DataLoader::SensorList sensor_list;
   DataLoader::LoadSensorList(config_path, sensor_list);
@@ -51,11 +52,26 @@ int main(int argc, char **argv) {
   data_loader.LoadCalibData();
   data_loader.LoadGinsInstallationHeight(config_path);
 
+  // Load optimization parameters from config
+  YAML::Node config_node = YAML::LoadFile(config_path);
+  YAML::Node opt_params = config_node["optimization_params"];
+  
+  int num_threads = opt_params["num_threads"].as<int>();
+  int lg_max_iter = opt_params["lidar_gins_optimization"]["max_iterations"].as<int>();
+  double lg_max_corr_dist = opt_params["lidar_gins_optimization"]["max_correspondence_distance"].as<double>();
+  int ml_max_iter = opt_params["multi_lidar_optimization"]["max_iterations"].as<int>();
+  double ml_max_corr_dist = opt_params["multi_lidar_optimization"]["max_correspondence_distance"].as<double>();
+  double rotation_threshold = opt_params["keyframe_selection"]["rotation_threshold"].as<double>();
+  double translation_threshold = opt_params["keyframe_selection"]["translation_threshold"].as<double>();
+  int time_precision = opt_params["output"]["time_precision"].as<int>();
+  double time_scale_factor = opt_params["output"]["time_scale_factor"].as<double>();
+  std::string output_file = opt_params["output"]["extrinsic_output_file"].as<std::string>();
+
   auto ext_infos = data_loader.ltg_ext_infos_;
   auto T_vec = data_loader.gnss_ins_data_;
   data_loader.SetTrajectoryOrigin(T_vec[0], T_vec);
 
-  auto selection = selectKeyframes(T_vec, std::stod(argv[2]));
+  auto selection = selectKeyframes(T_vec, translation_threshold, rotation_threshold);
 
   std::cout << "LiDAR-GNSS/INS Extrinsic Calibration" << std::endl;
 
@@ -83,9 +99,9 @@ int main(int argc, char **argv) {
     auto start = std::chrono::steady_clock::now();
 
     ExtrinsicCalibrator opt;
-    opt.SetNumThreads(4);
-    opt.SetOptIter(20);
-    opt.SetMaxCorrDis(0.5);
+    opt.SetNumThreads(num_threads);
+    opt.SetOptIter(lg_max_iter);
+    opt.SetMaxCorrDis(lg_max_corr_dist);
     opt.SetGinsHeight(data_loader.gins_installation_height_);
 
     CloudPtr map_lidar_align =
@@ -119,8 +135,8 @@ int main(int argc, char **argv) {
     auto duration =
         std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
             .count();
-    std::cout << std::setprecision(3) << std::fixed;
-    std::cout << "Average running time：" << duration / 1000.0 << "s"
+    std::cout << std::setprecision(time_precision) << std::fixed;
+    std::cout << "Average running time: " << duration / time_scale_factor << "s"
               << std::endl
               << std::endl;
   }
@@ -151,9 +167,9 @@ int main(int argc, char **argv) {
   std::pair<CloudPtr, CloudPtr> ml_map;
 
   ExtrinsicCalibrator opt;
-  opt.SetNumThreads(4);
-  opt.SetOptIter(30);
-  opt.SetMaxCorrDis(0.5);
+  opt.SetNumThreads(num_threads);
+  opt.SetOptIter(ml_max_iter);
+  opt.SetMaxCorrDis(ml_max_corr_dist);
 
   std::vector<std::string> multi_lidar_cloud_paths;
   std::vector<std::vector<std::string>> multi_lidar_cloud_paths2;
@@ -222,29 +238,14 @@ int main(int argc, char **argv) {
   auto duration =
       std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
           .count();
-  std::cout << std::setprecision(3) << std::fixed;
-  std::cout << "Average running time：" << duration / 1000.0 << "s"
+  std::cout << std::setprecision(time_precision) << std::fixed;
+  std::cout << "Average running time: " << duration / time_scale_factor << "s"
             << std::endl;
 
-  std::string lg_map_save_dir = std::string(argv[1]) + "/map/lidar_gins/";
-  for (size_t i = 0; i < ext_infos.size(); ++i) {
-    std::string lg_map_save_path =
-        lg_map_save_dir + ext_infos[i].lidar_name_ + "_la.pcd";
-    pcl::io::savePCDFileASCII(lg_map_save_path, *lidar_align_map_arr[i]);
-    lg_map_save_path = lg_map_save_dir + ext_infos[i].lidar_name_ + "_ori.pcd";
-    pcl::io::savePCDFileASCII(lg_map_save_path, *lg_map_arr[i].first);
-    lg_map_save_path = lg_map_save_dir + ext_infos[i].lidar_name_ + "_opt.pcd";
-    pcl::io::savePCDFileASCII(lg_map_save_path, *lg_map_arr[i].second);
-  }
 
-  std::string ml_map_save_dir = std::string(argv[1]) + "/map/multi_lidar/";
-  std::string ml_map_save_path = ml_map_save_dir + "map_ori.pcd";
-  pcl::io::savePCDFileASCII(ml_map_save_path, *ml_map.first);
-  ml_map_save_path = ml_map_save_dir + "map_opt.pcd";
-  pcl::io::savePCDFileASCII(ml_map_save_path, *ml_map.second);
 
   // save multi-lidar extrinsic parameters
-  std::ofstream outfile(argv[3]);
+  std::ofstream outfile(output_file);
   for (const auto &T_ext : multi_lidar_exts) {
     Eigen::Quaterniond q(T_ext.rotation());
     Eigen::Vector3d t(T_ext.translation());
@@ -272,7 +273,8 @@ int main(int argc, char **argv) {
 }
 
 std::vector<bool> selectKeyframes(const std::vector<Eigen::Isometry3d> &poses,
-                                  double translation_threshold) {
+                                  double translation_threshold,
+                                  double rotation_threshold) {
   std::vector<bool> selection(poses.size(), false);
   selection[0] = true;
   float t_travel = 0;
@@ -294,7 +296,7 @@ std::vector<bool> selectKeyframes(const std::vector<Eigen::Isometry3d> &poses,
     Eigen::AngleAxisd dR_aa(dR);
     R_travel += dR_aa.angle();
     last_rotation = poses[i].rotation();
-    if (R_travel >= 0.6) {
+    if (R_travel >= rotation_threshold) {
       selection[i] = true;
       R_travel = 0;
       t_travel = 0;

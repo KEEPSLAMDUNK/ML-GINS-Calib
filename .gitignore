@@ -78,3 +78,4 @@ ENV/
 env.bak/
 venv.bak/
 data/
+output/
