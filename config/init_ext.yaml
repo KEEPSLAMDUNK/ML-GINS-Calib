@@ -1,0 +1,129 @@
+data_dir: data
+gnss/ins: gins_sync
+data_mask_path: data_mask.txt
+
+gins_installation_height: 0.0
+
+lidar_list:
+  - livox
+  - middle
+  - left
+  - right
+  - back
+#  - ouster
+#  - front_left
+#  - front_right
+#  - avia
+#  - velo
+
+# T_imu_lidar
+init_ext:
+  livox:
+   position:
+     x: 0
+     y: 0
+     z: 0
+   orientation:
+     w: 0.99
+     x: 0.01
+     y: -0.12
+     z: -0.01
+  middle:
+   position:
+     x: 0
+     y: 0
+     z: 0
+   orientation:
+#     w: 0.0232133
+#     x: -0.70255
+#     y: -0.037592
+#     z: -0.710261
+     w: 0.653126
+     x: -0.0287627
+     y: 0.75669
+     z: 0.00441556
+  right:
+   position:
+     x: 0
+     y: 0
+     z: 0
+   orientation:
+     w: 0.494543
+     x: 0.470428
+     y: 0.527599
+     z: -0.505732
+  left:
+   position:
+     x: 0
+     y: 0
+     z: 0
+   orientation:
+     w: -0.480985
+     x: 0.504621
+     y: -0.503708
+     z: -0.510186
+  back:
+   position:
+     x: 0
+     y: 0
+     z: 0
+   orientation:
+     w: 0.0400058
+     x: -0.6901037
+     y: -0.0600087
+     z: 0.7201079
+
+  ouster:
+   position:
+     x: 0
+     y: 0
+     z: 0
+   orientation:
+     w: 1
+     x: 0
+     y: 0
+     z: 0
+
+  front_left:
+    position:
+      x: 0
+      y: 0
+      z: 0
+    orientation:
+      w: 0.705534
+      x: 0.0335795
+      y: 0.00638963
+      z: 0.707852
+
+  front_right:
+    position:
+      x: 0
+      y: 0
+      z: 0
+    orientation:
+      w: 0.715456
+      x: -0.0315438
+      y: -0.0502189
+      z: 0.696136
+
+  avia:
+    position:
+      x: 0
+      y: 0
+      z: 0
+    orientation:
+      w: 0.00
+      x: -0.00
+      y: -0.00
+      z: 1.00
+
+  velo:
+    position:
+      x: 0
+      y: 0
+      z: 0
+    orientation:
+      w: 0.97
+      x: 0.00
+      y: 0.26
+      z: 0.00

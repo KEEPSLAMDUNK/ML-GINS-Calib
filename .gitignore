@@ -1,5 +1,14 @@
-# Prerequisites
-*.d
+# Build directories
+build/
+build_*/
+cmake-build-*/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
 
 # Compiled Object files
 *.slo
@@ -16,10 +25,6 @@
 *.dylib
 *.dll
 
-# Fortran module files
-*.mod
-*.smod
-
 # Compiled Static libraries
 *.lai
 *.la
@@ -30,3 +35,46 @@
 *.exe
 *.out
 *.app
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Log files
+*.log
+
+# Data files (uncomment if you want to ignore data)
+# data/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Documentation build
+docs/_build/
+docs/build/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+data/
