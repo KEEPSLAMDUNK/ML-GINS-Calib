@@ -70,14 +70,52 @@ make -j$(nproc)
 ### Basic Usage
 
 ```bash
-./build/bin/ml_gins_calibrator <data_directory> <keyframe_distance>
+./build/bin/ml_gins_calibrator
 ```
 
-### Example
+### Dataset
 
-```bash
-./build/bin/ml_gins_calibrator data/ 3
-```
+You can download the experimental dataset from Baidu Pan:
+
+**Link:** https://pan.baidu.com/s/1DVwzhEv6-C0_kyXEfRuYeg?pwd=1uy3  
+**Extraction Code:** 1uy3
+
+### Configuration
+
+You can modify the relevant configuration parameters by editing the `config/params.yaml` file:
+
+#### Data Configuration
+- `data_dir`: Data file directory path
+- `gnss/ins`: GNSS/INS data filename
+- `data_mask_path`: Data mask file path
+- `gins_installation_height`: GNSS/INS installation height
+
+#### Optimization Parameters
+- `optimization_params.num_threads`: Number of optimizer threads
+- `optimization_params.lidar_gins_optimization`: First stage LiDAR-GNSS/INS optimization parameters
+  - `max_iterations`: Maximum number of iterations (default: 20)
+  - `max_correspondence_distance`: Maximum correspondence distance (default: 0.5m)
+- `optimization_params.multi_lidar_optimization`: Second stage multi-LiDAR optimization parameters
+  - `max_iterations`: Maximum number of iterations (default: 30)
+  - `max_correspondence_distance`: Maximum correspondence distance (default: 0.5m)
+
+#### Keyframe Selection Parameters
+- `keyframe_selection.rotation_threshold`: Rotation threshold in radians (default: 0.6)
+- `keyframe_selection.translation_threshold`: Translation threshold in meters (default: 5.0)
+
+#### Point Cloud Processing Parameters
+- `point_cloud.voxel_size`: Voxel grid downsampling size (default: 0.2m)
+- `point_cloud.downsample_leaf_size`: Downsampling leaf size (default: 0.1m)
+- `point_cloud.ground_distance_threshold`: Ground segmentation distance threshold (default: 0.1m)
+
+#### LiDAR Sensor Configuration
+- `lidar_list`: List of active LiDAR sensors
+- `init_ext`: Initial extrinsic parameter estimates for each LiDAR relative to IMU
+  - `position`: Position parameters (x, y, z)
+  - `orientation`: Orientation quaternion (w, x, y, z)
+
+#### Output Configuration
+- `output.extrinsic_output_file`: Output file path for extrinsic parameters
 
 ## License
 
@@ -100,7 +138,7 @@ If you use this work in your research, please cite:
 ## Roadmap
 
 - [ ] Code refactoring and optimization
-- [ ] Upload experimental datasets
+- [x] Upload experimental datasets
 
 ## Contact
 
