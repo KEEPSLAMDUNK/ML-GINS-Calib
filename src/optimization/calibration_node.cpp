@@ -501,7 +501,7 @@ double analyzeTerrainRoughness(const CloudPtr &cloud,
     float std_dev = std::sqrt(variance / distances.size());
 
     // Output ground roughness
-    std::cout << "Roughness: " << std_dev << std::endl;
+    // std::cout << "Roughness: " << std_dev << std::endl;
   }
 
   return height;

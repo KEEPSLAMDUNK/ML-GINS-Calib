@@ -914,9 +914,7 @@ void calib::ExtrinsicCalibrator::JointOptimization(
 
     this->AddPriorFactor(gtsam::Symbol('x', 0), Eigen::Isometry3d::Identity());
 
-
-
-    std::cout << graph_.size() << std::endl;
+    // std::cout << graph_.size() << std::endl;
 
     auto result = this->SolveGraphOptimization();
     this->ClearGraph();
